@@ -8,7 +8,9 @@ RUN yum -y install git wget
 # Install build tools
 RUN yum -y install cmake make automake
 RUN yum -y install centos-release-scl-rh
-RUN yum -y install devtoolset-6-gcc devtoolset-6-gcc-c++ openssl-devel libuuid libuuid-devel python27-python-devel.x86_64
+RUN yum -y install devtoolset-6-gcc devtoolset-6-gcc-c++ openssl-devel libuuid libuuid-devel
+RUN yum -y remove python
+RUN yum -y install python-devel
 # RUN scl enable devtoolset-6 bash
 
 RUN echo 'PATH=/opt/rh/devtoolset-6/root/usr/bin/:$PATH' >> ~/.bash_profile
