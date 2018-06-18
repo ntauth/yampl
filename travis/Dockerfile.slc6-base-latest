@@ -9,6 +9,14 @@ RUN yum -y install sl-release-scl-rh
 RUN yum -y --skip-broken install cmake devtoolset-6-gcc devtoolset-6-gcc-c++ openssl-devel libuuid libuuid-devel
 # RUN scl enable devtoolset6 bash
 
+# Install Python 2.7.0
+RUN wget https://www.python.org/ftp/python/2.7/Python-2.7.tgz
+RUN tar xzf Python-2.7.tgz
+RUN cd Python-2.7
+RUN ./configure
+RUN make -j3
+RUN make install
+
 RUN echo 'PATH=/opt/rh/devtoolset-6/root/usr/bin/:$PATH' >> ~/.bash_profile
 RUN echo 'export PATH' >> ~/.bash_profile
 RUN source ~/.bash_profile
