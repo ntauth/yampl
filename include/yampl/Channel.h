@@ -5,7 +5,6 @@
 
 namespace yampl
 {
-
     enum Context
     {
       THREAD = 0,

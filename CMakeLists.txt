@@ -43,7 +43,7 @@ set(YAMPL_COMMON_LIBS ${CMAKE_BINARY_DIR}/libyampl.so dl uuid ${CMAKE_THREAD_LIB
 include(cmake/YamplDepends.cmake)
 
 # Include directories
-include_directories(include/ /usr/local/include)
+include_directories(include/ /usr/local/include pybind11/include)
 
 # Source files
 add_library(yampl SHARED
@@ -205,3 +205,9 @@ foreach(YAMPL_CMAKE_FILE ${YAMPL_PLUGIN_CMAKE_FILES})
     string(REGEX REPLACE "(\\.conf\\.cmake)$" "" YAMPL_PLUGIN_NAME ${YAMPL_CMAKE_FILE})
     include(${YAMPL_CMAKE_FILE})
 endforeach(YAMPL_CMAKE_FILE)
+
+## Python Bindings
+AddExtProjectGit("https://github.com/pybind/pybind11" ${CMAKE_SOURCE_DIR})
+
+add_subdirectory(pybind11)
+pybind11_add_module(yampl_py src/PyBindModule.cpp)

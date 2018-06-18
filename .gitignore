@@ -29,3 +29,6 @@ cmake-build-*
 plugins
 !plugins/yampl-shm
 !plugins/yampl-pipe
+
+# Ignore pybind11
+pybind11
