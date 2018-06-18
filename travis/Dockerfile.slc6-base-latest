@@ -20,6 +20,7 @@ RUN source ~/.bash_profile
 RUN gcc --version
 
 # Make symbolic links for cc and c++
+RUN ln -s /opt/rh/devtoolset-6/root/usr/bin/gcc /usr/bin/gcc
 RUN ln -s /opt/rh/devtoolset-6/root/usr/bin/cc /usr/bin/cc
 RUN ln -s /opt/rh/devtoolset-6/root/usr/bin/c++ /usr/bin/c++
 
