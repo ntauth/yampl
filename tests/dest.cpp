@@ -59,7 +59,8 @@ int main(int argc, char *argv[])
 
         delete factory;
     }
-    else {
+    else
+    {
         factory = new SocketFactory();
         server(factory, Channel("zmq", LOCAL));
         server(factory, Channel("pipe", LOCAL_PIPE));

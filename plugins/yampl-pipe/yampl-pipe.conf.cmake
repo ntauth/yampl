@@ -6,7 +6,7 @@ if (NOT DEFINED WITH_PLUGIN_PIPE OR WITH_PLUGIN_PIPE)
             ${CMAKE_CURRENT_LIST_DIR}/src/PluginMain.cpp
             ${YAMPL_PLUGIN_COMMON_SRCS}
     )
-
+    
     target_include_directories(yampl-pipe PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
 
     set_target_properties(yampl-pipe

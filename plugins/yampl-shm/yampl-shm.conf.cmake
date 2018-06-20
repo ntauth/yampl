@@ -9,6 +9,7 @@ if (NOT DEFINED WITH_PLUGIN_SHM OR WITH_PLUGIN_SHM)
     )
 
     target_include_directories(yampl-shm PRIVATE ${CMAKE_CURRENT_LIST_DIR}/include)
+    target_link_libraries(yampl-shm rt)
 
     set_target_properties(yampl-shm
             PROPERTIES

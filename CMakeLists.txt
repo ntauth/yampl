@@ -1,7 +1,4 @@
-##
-# @author: Ayoub Chouak (a.chouak@protonmail.com)
-# @brief:  CMakeLists for YAMPL
-##
+## CMakeLists
 message("
  ▄         ▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄▄       ▄▄  ▄▄▄▄▄▄▄▄▄▄▄  ▄
 ▐░▌       ▐░▌▐░░░░░░░░░░░▌▐░░▌     ▐░░▌▐░░░░░░░░░░░▌▐░▌
@@ -25,13 +22,30 @@ project(yampl)
 include(cmake/YamplUtils.cmake)
 USE_CXX14()
 
+# Suppress -Wterminate and -Wreturn-type
+set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -Wno-terminate -Wno-return-type")
+
 # Default install prefix
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX $ENV{HOME}/yampl)
 endif()
 
 # Common source files for plugins
-set(YAMPL_PLUGIN_COMMON_SRCS src/ISocket.cpp src/plugin/PluginArbiter.cpp)
+set(YAMPL_PLUGIN_COMMON_SRCS
+        src/plugin/PluginArbiter.cpp
+        src/utils/utils.cpp
+        src/utils/Globals.cpp
+        src/ISocket.cpp
+)
+
+# Common source files for python bindings
+set(YAMPL_PYBIND_COMMON_SRCS
+        src/utils/utils.cpp
+        src/utils/Globals.cpp
+        src/SocketFactory.cpp
+        src/plugin/PluginArbiter.cpp
+        src/plugin/DynamicModule.cpp
+)
 
 # PThreads
 find_package(Threads)
@@ -47,15 +61,13 @@ include_directories(include/ /usr/local/include pybind11/include)
 
 # Source files
 add_library(yampl SHARED
+        src/utils/utils.cpp
+        src/utils/Globals.cpp
         src/plugin/PluginArbiter.cpp
         src/plugin/DynamicModule.cpp
-        src/utils/utils.cpp
         src/SocketFactory.cpp
         src/ISocket.cpp
 )
-
-# Suppress -Wterminate
-target_compile_options(yampl PRIVATE "-Wno-terminate")
 
 option(WITH_EXAMPLES "Include examples" ON)
 
@@ -71,9 +83,9 @@ if(WITH_EXAMPLES)
     target_link_libraries(server ${YAMPL_COMMON_LIBS})
     add_dependencies(client yampl)
     add_dependencies(server yampl)
-    target_compile_options(client PRIVATE "-Wno-terminate")
-    target_compile_options(server PRIVATE "-Wno-terminate")
-    
+
+    set(YAMPL_CLIENT_SERVER_TIMEOUT 10)
+
     # Benchmarks
     add_executable(benchmark examples/benchmarks/benchmark.cpp)
     set_target_properties(benchmark
@@ -82,7 +94,12 @@ if(WITH_EXAMPLES)
     )
     target_link_libraries(benchmark ${YAMPL_COMMON_LIBS})
     add_dependencies(benchmark yampl)
-    target_compile_options(benchmark PRIVATE "-Wno-terminate")
+
+    # Add a custom benchmark command
+    add_custom_target(bench
+        COMMAND sh -c "benchmark/benchmark; timeout ${YAMPL_CLIENT_SERVER_TIMEOUT} sh -c \"client_server/server & client_server/client\""
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
+    )
 endif()
 
 option(WITH_TESTS "Include tests" ON)
@@ -99,6 +116,7 @@ if(WITH_TESTS)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     )
     target_link_libraries(pluginarbiter ${YAMPL_COMMON_LIBS})
+
     add_dependencies(pluginarbiter yampl)
     add_test(NAME pluginarbiter COMMAND pluginarbiter)
 
@@ -109,6 +127,7 @@ if(WITH_TESTS)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     )
     target_link_libraries(dynmodule ${YAMPL_COMMON_LIBS})
+
     add_dependencies(dynmodule yampl)
     add_test(NAME dynmodule COMMAND dynmodule WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/tests")
 
@@ -119,6 +138,7 @@ if(WITH_TESTS)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     )
     target_link_libraries(calls ${YAMPL_COMMON_LIBS})
+
     add_dependencies(calls yampl)
     add_test(NAME calls COMMAND calls)
 
@@ -129,6 +149,7 @@ if(WITH_TESTS)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     )
     target_link_libraries(dest ${YAMPL_COMMON_LIBS})
+
     add_dependencies(dest yampl)
     add_test(NAME dest COMMAND dest)
 
@@ -139,6 +160,7 @@ if(WITH_TESTS)
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/tests"
     )
     target_link_libraries(size ${YAMPL_COMMON_LIBS})
+
     add_dependencies(size yampl)
     add_test(NAME size COMMAND size)
 endif()
@@ -150,9 +172,7 @@ target_link_libraries(yampl
     uuid
 )
 
-#
-# Install step
-#
+## Install step
 set_target_properties(yampl PROPERTIES RESOURCE "${YAMPL_RESOURCES}")
 
 # Configure yampl-env.sh.in
@@ -210,4 +230,13 @@ endforeach(YAMPL_CMAKE_FILE)
 AddExtProjectGit("https://github.com/pybind/pybind11" ${CMAKE_SOURCE_DIR})
 
 add_subdirectory(pybind11)
-pybind11_add_module(yampl_py src/PyBindModule.cpp)
+pybind11_add_module(yampl_py
+        ${YAMPL_PYBIND_COMMON_SRCS}
+        src/PyBindModule.cpp
+)
+
+# Rename yampl_py.suffix.so to yampl.so
+add_custom_command(TARGET yampl_py
+        POST_BUILD
+        COMMAND sh -c "cp $<TARGET_FILE:yampl_py> yampl.so"
+)
