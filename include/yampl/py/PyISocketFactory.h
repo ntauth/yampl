@@ -17,6 +17,9 @@ namespace yampl
 
     namespace py
     {
+        /**
+         * @brief Python wrapper class for yampl::ISocketFactory
+         */
         class PyISocketFactory : public ISocketFactory
         {
             public:
@@ -25,13 +28,8 @@ namespace yampl
                 virtual ISocket* createClientSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator, const std::string& name = DEFAULT_ID) = 0;
                 virtual ISocket* createServerSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator) = 0;
         protected:
-            ISocket *createClientSocket(Channel channel, Semantics semantics = COPY_DATA, void (*deallocator)(void *, void *) = defaultDeallocator, const std::string& name = DEFAULT_ID) override {
-                return nullptr;
-            }
-
-            ISocket *createServerSocket(Channel channel, Semantics semantics = COPY_DATA, void (*deallocator)(void *, void *) = defaultDeallocator) override {
-                return nullptr;
-            }
+            ISocket *createClientSocket(Channel channel, Semantics semantics = COPY_DATA, void (*deallocator)(void *, void *) = defaultDeallocator, const std::string& name = DEFAULT_ID) override {}
+            ISocket *createServerSocket(Channel channel, Semantics semantics = COPY_DATA, void (*deallocator)(void *, void *) = defaultDeallocator) override {}
         };
     }
 

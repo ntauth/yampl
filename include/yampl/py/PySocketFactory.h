@@ -5,7 +5,11 @@
  */
 
 #include "PyISocketFactory.h"
+
 #include "yampl/SocketFactory.h"
+#include "yampl/Exceptions.h"
+
+#include <iostream>
 
 #ifndef YAMPL_PYSOCKETFACTORY_H
 #define YAMPL_PYSOCKETFACTORY_H
@@ -16,6 +20,9 @@ namespace yampl
 
     namespace py
     {
+        /**
+         * @brief Python wrapper class for yampl::SocketFactory
+         */
         class PySocketFactory : public PyISocketFactory
         {
             protected:
@@ -24,14 +31,24 @@ namespace yampl
                 PySocketFactory() : factory() { }
                 ~PySocketFactory() override = default;
 
-                ISocket* createClientSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator, const std::string& name = DEFAULT_ID) override {
+                /**
+                 * @see  SocketFactory::createClientSocket
+                 * @note deallocator must point to a valid non-temporary function (eg. not a lambda)
+                 */
+                ISocket* createClientSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator, const std::string& name = DEFAULT_ID) override
+                {
                     // Forward
-                    return factory.createClientSocket(channel, semantics, *deallocator.template target<deallocator_t*>(), name);
+                    return factory.createClientSocket(channel, semantics, fn_target, name);
                 }
 
-                ISocket* createServerSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator) override {
+                /**
+                * @see  SocketFactory::createServerSocket
+                * @note deallocator must point to a valid non-temporary function (eg. not a lambda)
+                */
+                ISocket* createServerSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator) override
+                {
                     // Forward
-                    return factory.createServerSocket(channel, semantics, *deallocator.template target<deallocator_t*>());
+                    return factory.createServerSocket(channel, semantics, fn_target);
                 }
         };
     }

@@ -32,10 +32,7 @@ namespace yampl
     {
         public:
             UnsupportedException() : Exception("This feature is not supported yet") {}
-            /**
-             * @author Ayoub Chouak
-             */
-            UnsupportedException(char* const what) : Exception(what) {}
+            UnsupportedException(const char* what) : Exception(what) {}
     };
 
     class InvalidOperationException: public Exception{
