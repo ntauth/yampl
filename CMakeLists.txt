@@ -34,7 +34,6 @@ endif()
 set(YAMPL_PLUGIN_COMMON_SRCS
         src/plugin/PluginArbiter.cpp
         src/utils/utils.cpp
-        src/utils/Globals.cpp
         src/ISocket.cpp
 )
 
@@ -168,7 +167,6 @@ endif()
 # Libraries
 target_link_libraries(yampl
     ${CMAKE_THREAD_LIBS_INIT}
-    rt
     uuid
 )
 

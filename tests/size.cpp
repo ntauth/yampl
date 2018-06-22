@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 
         client(factory, Channel("zmq", LOCAL));
         client(factory, Channel("pipe", LOCAL_PIPE));
-//        client(factory, Channel("shm", LOCAL_SHM));
+        client(factory, Channel("shm", LOCAL_SHM));
 
         delete factory;
     }
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
         server(factory, Channel("zmq", LOCAL));
         server(factory, Channel("pipe", LOCAL_PIPE));
-//        server(factory, Channel("shm", LOCAL_SHM));
+        server(factory, Channel("shm", LOCAL_SHM));
 
         wait(&status);
         cout << "[size] Success" << endl;
