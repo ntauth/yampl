@@ -10,6 +10,8 @@
 
 namespace yampl
 {
+//    extern std::string DEFAULT_ID;
+
     class ISocket
     {
         public:

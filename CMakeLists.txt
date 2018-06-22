@@ -230,6 +230,7 @@ AddExtProjectGit("https://github.com/pybind/pybind11" ${CMAKE_SOURCE_DIR})
 add_subdirectory(pybind11)
 pybind11_add_module(yampl_py
         ${YAMPL_PYBIND_COMMON_SRCS}
+        src/py/PyCast.cpp
         src/py/PyBindModule.cpp
 )
 

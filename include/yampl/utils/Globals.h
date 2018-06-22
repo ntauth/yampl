@@ -10,10 +10,11 @@
 
 #include <string>
 
+#define DEFAULT_ID get_default_id()
+
 namespace yampl
 {
-    /* Default Peer Id */
-    extern std::string DEFAULT_ID;
+    std::string& get_default_id();
 }
 
 #endif // YAMPL_GLOBALS_H

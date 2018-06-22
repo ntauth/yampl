@@ -9,6 +9,8 @@ namespace yampl
 {
     using plugin::PluginArbiterException;
 
+//    std::string DEFAULT_ID = "";
+
     SocketFactory::SocketFactory() noexcept
         : arbiter(PluginArbiter::get_instance())
         , module_base_path(get_plugin_base_dir())

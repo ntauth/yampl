@@ -8,13 +8,14 @@
 #define YAMPL_PYSOCKET_H
 
 #include "yampl/ISocket.h"
-#include "yampl/py/PySocketFactory.h"
 
-#include <pybind11/pybind11.h>
+#include "yampl/py/PyCast.h"
+#include "yampl/py/PySocketFactory.h"
 
 #include <algorithm>
 #include <memory>
 #include <string>
+#include <iostream>
 
 namespace py_ = pybind11;
 
@@ -41,31 +42,36 @@ namespace yampl
                  * @param context channel context
                  */
                 PySocket(std::string name, std::string context)
-                    : channel(name, context)
                 {
                     Context ctx;
 
                     std::transform(name.begin(), name.end(), name.begin(), ::tolower);
 
                     // Decode the context string to a yampl::Context
-                    if (name == "THREAD")
+                    if (context == "THREAD")
                         ctx = Context::THREAD;
-                    else if (name == "LOCAL")
+                    else if (context == "LOCAL")
                         ctx = Context::LOCAL;
-                    else if (name == "LOCAL_SHM")
+                    else if (context == "LOCAL_SHM")
                         ctx = Context::LOCAL_SHM;
-                    else if (name == "LOCAL_PIPE")
+                    else if (context == "LOCAL_PIPE")
                         ctx = Context::LOCAL_PIPE;
-                    else if (name == "DISTRIBUTED")
+                    else if (context == "DISTRIBUTED")
                         ctx = Context::DISTRIBUTED;
                     else
                         throw py_::value_error(context + " is not a valid context.");
 
-                    factory = std::make_unique<SocketFactory>();
+                    channel.name = name;
+                    channel.context = ctx;
+
+                    factory = std::make_unique<PySocketFactory>();
                 }
 
-                void send(py_::object message) {
-                    py_::
+                void send(py_::object message)
+                {
+                    byte_buffer raw = message.cast<byte_buffer>();
+
+                    socket->send(raw.getBuffer(), raw.getSize());
                 }
         };
     }

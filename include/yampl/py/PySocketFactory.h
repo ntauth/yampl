@@ -38,7 +38,7 @@ namespace yampl
                 ISocket* createClientSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator, const std::string& name = DEFAULT_ID) override
                 {
                     // Forward
-                    return factory.createClientSocket(channel, semantics, fn_target, name);
+                    return factory.createClientSocket(channel, semantics, *deallocator.template target<deallocator_t*>(), name);
                 }
 
                 /**
@@ -48,7 +48,7 @@ namespace yampl
                 ISocket* createServerSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator) override
                 {
                     // Forward
-                    return factory.createServerSocket(channel, semantics, fn_target);
+                    return factory.createServerSocket(channel, semantics, *deallocator.template target<deallocator_t*>());
                 }
         };
     }

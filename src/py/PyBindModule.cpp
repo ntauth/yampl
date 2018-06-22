@@ -9,8 +9,10 @@
 #include "yampl/ISocketFactory.h"
 #include "yampl/SocketFactory.h"
 #include "yampl/utils/Globals.h"
+
 #include "yampl/py/PyCast.h"
 #include "yampl/py/PySocketFactory.h"
+#include "yampl/py/PySocket.h"
 
 #include <functional>
 #include <pybind11/pybind11.h>
@@ -81,6 +83,14 @@ PYBIND11_MODULE(yampl, self)
     .def("tryRecv", static_cast<try_recv0_t>(&yampl::ISocket::tryRecv), "buffer"_a, "timeout"_a = 0, "peerId"_a = yampl::DEFAULT_ID);
 
     /**
+    * @see  yampl::py::PySocket
+    * @note abstract
+    */
+    py::class_<yampl::py::PySocket>(self, "PySocket", R"pbdoc(ISocket wrapper class)pbdoc")
+    .def(py::init<std::string, std::string>(), "name"_a, "context"_a)
+    .def("send", &yampl::py::PySocket::send, "message"_a);
+
+    /**
     * @see yampl::Semantics
     */
     py::enum_<yampl::Semantics>(self, "Semantics", R"pbdoc(Buffer copy semantics)pbdoc")
@@ -88,7 +98,7 @@ PYBIND11_MODULE(yampl, self)
     .value("MOVE_DATA", yampl::Semantics::MOVE_DATA);
 
     /**
-    * @see  yampl::PySocketFactory
+    * @see  yampl::py::Py(I)SocketFactory
     * @note abstract
     */
     std::function<void (void*, void*)> deallocator = yampl::defaultDeallocator;

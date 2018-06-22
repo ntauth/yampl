@@ -6,7 +6,10 @@
 
 #include "yampl/utils/Globals.h"
 
- namespace yampl
- {
-     std::string DEFAULT_ID = "";
- }
+namespace yampl
+{
+    std::string& get_default_id() {
+        static std::string default_id;
+        return default_id;
+    }
+}
