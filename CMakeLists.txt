@@ -94,8 +94,8 @@ if(WITH_EXAMPLES)
     target_link_libraries(benchmark ${YAMPL_COMMON_LIBS})
     add_dependencies(benchmark yampl)
 
-    # Add a custom benchmark command
-    add_custom_target(bench
+    # Add a custom command to run examples
+    add_custom_target(example
         COMMAND sh -c "benchmark/benchmark; timeout ${YAMPL_CLIENT_SERVER_TIMEOUT} sh -c \"client_server/server & client_server/client\""
         WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
     )

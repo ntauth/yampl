@@ -35,9 +35,6 @@ void server(ISocketFactory* factory, const Channel &channel)
     catch(UnroutableException&) {
         // OK, it's expected to reach this
     }
-    catch (...) {
-        // @todo: Remove
-    }
 
     socket->sendTo("client", "pong");
 
