@@ -13,7 +13,6 @@
 
 #include <pybind11/pybind11.h>
 #include <string>
-#include <cstdint>
 
 #if PY_MAJOR_VERSION < 3
     #define PyVariantString_FromString PyString_AS_STRING
@@ -27,37 +26,13 @@ namespace yampl
 {
     namespace py
     {
-        /**
-         * @todo Add get_instance to fix segmentation errors
-         */
         class pickler
         {
             private:
-                static py_::object pickle_module;
+                static py_::object get_pickle_module();
             public:
-                pickler()
-                {
-                    // Load the pickle module
-                    if (!pickle_module)
-                    {
-                        pickle_module = py_::object(py_::handle(PyImport_ImportModuleNoBlock("pickle")), false);
-
-                        if (!pickle_module)
-                            throw UnsupportedException("Could not load Python module `pickle`");
-                    }
-                }
-
-                py_::object dumps(py_::object obj)
-                {
-                    auto pickle = PyObject_CallMethodObjArgs(pickle_module.ptr(), PyVariantString_FromString("dumps"), obj.ptr(), nullptr);
-                    return py_::object(py_::handle(pickle), false);
-                }
-
-                py_::object loads(py_::object obj)
-                {
-                    auto unpickle = PyObject_CallMethodObjArgs(pickle_module.ptr(), PyVariantString_FromString("loads"), obj.ptr());
-                    return py_::object(py_::handle(unpickle), false);
-                }
+                static py_::object dumps(py_::object obj);
+                static py_::object loads(py_::object obj);
         };
 
 
@@ -66,7 +41,6 @@ namespace yampl
             protected:
                 uint8_t* buffer;
                 size_t   size;
-                static pickler pickler_obj;
             public:
                 byte_buffer() = default;
 
@@ -75,32 +49,6 @@ namespace yampl
                     , size(size_)
                 {
 
-                }
-
-                /**
-                 * Pickle __getstate__ method for py_::pickle
-                 *
-                 * @param buf raw byte buffer
-                 * @return the unpickled object
-                 */
-                static auto get_state(byte_buffer const& buf)
-                {
-                    py_::object obj(py_::handle(), false);
-
-                    return py_::make_tuple(buf.getSize(), pickler_obj.loads(obj));
-                }
-
-                /**
-                * Pickle __setstate__ method for py_::pickle
-                *
-                * @param obj the python object to pickle
-                * @return the pickled representation of the object
-                */
-                static auto set_state(py_::object obj)
-                {
-                    py_::object pickle = pickler_obj.dumps(obj);
-
-                    return byte_buffer(reinterpret_cast<uint8_t*>(PyBytes_AsString(pickle.ptr())), py_::len(pickle));
                 }
 
                 uint8_t* setBuffer(uint8_t* buffer_)
@@ -142,8 +90,6 @@ namespace pybind11
     {
         template <> struct type_caster<yampl::py::byte_buffer>
         {
-            private:
-                yampl::py::pickler pickler_;
             public:
                 PYBIND11_TYPE_CASTER(yampl::py::byte_buffer, _("byte_buffer"));
 
@@ -156,7 +102,7 @@ namespace pybind11
                  */
                 bool load(handle h, bool)
                 {
-                    object pickle = pickler_.dumps(object(h, true));
+                    object pickle = yampl::py::pickler::dumps(object(h, true));
 
                     if (!pickle)
                         return false;

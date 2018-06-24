@@ -45,7 +45,7 @@ namespace yampl
                 {
                     Context ctx;
 
-                    std::transform(name.begin(), name.end(), name.begin(), ::tolower);
+                    std::transform(context.begin(), context.end(), context.begin(), ::toupper);
 
                     // Decode the context string to a yampl::Context
                     if (context == "THREAD")
@@ -71,7 +71,11 @@ namespace yampl
                 {
                     byte_buffer raw = message.cast<byte_buffer>();
 
-                    socket->send(raw.getBuffer(), raw.getSize());
+                    for (size_t i = 0; i < raw.getSize(); i++)
+                        std::cout << raw.getBuffer()[i];
+                    std::cout << std::endl;
+
+//                    socket->send(raw.getBuffer(), raw.getSize());
                 }
         };
     }
