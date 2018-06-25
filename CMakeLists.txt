@@ -279,10 +279,9 @@ if (WITH_PYBIND)
                 COMMAND sh -c "cp $<TARGET_FILE:yampl_py> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/yampl${PY_EXTENSION_SUFFIX}"
         )
     else()
-#        set(Python_ADDITIONAL_VERSIONS "")
-
         # Recursively build the bindings by invoking Python
         add_custom_target(yampl_py_NO_PYPI_INVOKE ALL COMMAND ${PYTHON_EXECUTABLE} "setup.py" "build" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+
         # Install step
         install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} \"setup.py\" \"install\" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})"
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})

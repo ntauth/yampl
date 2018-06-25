@@ -9,6 +9,7 @@ RUN yum -y install git wget
 RUN yum -y install cmake make automake
 RUN yum -y install centos-release-scl-rh
 RUN yum -y install python-devel python-pip devtoolset-6-gcc devtoolset-6-gcc-c++ openssl-devel libuuid libuuid-devel
+RUN python -m pip install --upgrade pip setuptools wheel
 
 RUN echo 'PATH=/opt/rh/devtoolset-6/root/usr/bin/:$PATH' >> ~/.bash_profile
 RUN echo 'export PATH' >> ~/.bash_profile
