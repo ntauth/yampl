@@ -98,7 +98,6 @@ PYBIND11_MODULE(yampl, self)
 
     /**
     * @see  yampl::py::Py(I)SocketFactory
-    * @note abstract
     */
     std::function<void (void*, void*)> deallocator = yampl::defaultDeallocator;
 
