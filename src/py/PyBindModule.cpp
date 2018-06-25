@@ -4,6 +4,8 @@
  * @brief  The file contains the pybind11 bindings definition for YAMPL
  */
 
+#include "config.h"
+
 #include "yampl/Channel.h"
 #include "yampl/ISocket.h"
 #include "yampl/ISocketFactory.h"
@@ -20,9 +22,6 @@
 
 namespace py = pybind11;
 using namespace py::literals;
-
-/* Bindings version */
-static constexpr auto _YAMPL_PY_VERSION = "1.0";
 
 template<typename R, typename... Args>
 constexpr auto make_pythunk(std::function<R (Args...)> fn) {
@@ -53,7 +52,7 @@ PYBIND11_MODULE(yampl, self)
            ISocket
     )pbdoc";
 
-    self.attr("__version__") = _YAMPL_PY_VERSION;
+    self.attr("__version__") = YAMPL_PY_VERSION;
 
     /**
     * @see yampl::Context
