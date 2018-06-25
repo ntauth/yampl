@@ -20,3 +20,6 @@ RUN ln -s /opt/rh/devtoolset-6/root/usr/bin/c++ /usr/bin/c++
 RUN wget https://www.python.org/ftp/python/2.7/Python-2.7.tgz
 RUN tar xzf Python-2.7.tgz
 RUN cd Python-2.7 && ./configure && make -j3 && make install
+
+# Install pip
+RUN yum -y install python-pip

@@ -38,10 +38,9 @@ namespace yampl
 
         class byte_buffer
         {
-            protected:
-                uint8_t* buffer;
-                size_t   size;
             public:
+                using data_type = uint8_t;
+
                 byte_buffer() = default;
 
                 byte_buffer(uint8_t* buffer_, size_t size_)
@@ -80,6 +79,9 @@ namespace yampl
                         delete buffer;
                     size = 0;
                 }
+            protected:
+                data_type* buffer;
+                size_t     size;
         };
     }
 }

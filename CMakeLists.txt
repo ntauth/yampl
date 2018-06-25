@@ -109,8 +109,6 @@ if (NOT PYBIND_ONLY)
         add_dependencies(client yampl)
         add_dependencies(server yampl)
 
-        set(YAMPL_CLIENT_SERVER_TIMEOUT 10)
-
         # Benchmarks
         add_executable(benchmark examples/benchmarks/benchmark.cpp)
         set_target_properties(benchmark
@@ -122,7 +120,7 @@ if (NOT PYBIND_ONLY)
 
         # Add a custom command to run examples
         add_custom_target(example
-            COMMAND sh -c "benchmark/benchmark; timeout ${YAMPL_CLIENT_SERVER_TIMEOUT} sh -c \"client_server/server & client_server/client\""
+            COMMAND sh -c "benchmark/benchmark && client_server/server & client_server/client"
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
         )
     endif()

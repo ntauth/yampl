@@ -69,13 +69,21 @@ namespace yampl
 
                 void send(py_::object message)
                 {
-                    byte_buffer raw = message.cast<byte_buffer>();
+                    // Pickle
+                    byte_buffer raw = pickler::dumps(py_::str(message)).cast<byte_buffer>();
+                    socket->send(raw.getBuffer(), raw.getSize());
+                }
 
-                    for (size_t i = 0; i < raw.getSize(); i++)
-                        std::cout << raw.getBuffer()[i];
-                    std::cout << std::endl;
+                py_::tuple recv()
+                {
+                    char* data;
+                    auto size = socket->recv(data);
 
-//                    socket->send(raw.getBuffer(), raw.getSize());
+                    byte_buffer buffer(reinterpret_cast<byte_buffer::data_type*>(data), size);
+
+                    // Unpickle
+                    auto obj = pickler::loads(py_::cast(buffer, py_::return_value_policy::take_ownership));
+                    return py_::make_tuple(size, obj);
                 }
         };
     }
