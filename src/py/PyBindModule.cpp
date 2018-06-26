@@ -1,7 +1,7 @@
 /**
  * @author Ayoub Chouak (a.chouak@protonmail.com)
  * @file   PyBindModule.cpp
- * @brief  The file contains the pybind11 bindings definition for YAMPL
+ * @brief  PyBind11 bindings for YAMPL
  */
 
 #include "config.h"
@@ -32,10 +32,6 @@ template<typename R, typename... Args>
 constexpr auto make_pythunk(R (*fn)(Args...)) {
     return [&](Args... x) { return fn(x...); };
 }
-
-using send0_t = void (yampl::ISocket::*)(void*, size_t, void*);
-using recv0_t = ssize_t (yampl::ISocket::*)(void*&, std::string&);
-using try_recv0_t = ssize_t (yampl::ISocket::*)(void*&, long, std::string&);
 
 PYBIND11_MODULE(yampl, self)
 {
@@ -77,17 +73,29 @@ PYBIND11_MODULE(yampl, self)
     * @note abstract
     */
     py::class_<yampl::ISocket>(self, "ISocket", R"pbdoc(Socket abstract base class)pbdoc")
-    .def("send", static_cast<send0_t>(&yampl::ISocket::send), "buffer"_a, "size"_a, "hint"_a = nullptr)
-    .def("recv", static_cast<recv0_t>(&yampl::ISocket::recv), "buffer"_a, "peerId"_a = yampl::DEFAULT_ID)
-    .def("tryRecv", static_cast<try_recv0_t>(&yampl::ISocket::tryRecv), "buffer"_a, "timeout"_a = 0, "peerId"_a = yampl::DEFAULT_ID);
+    .def("send", static_cast<yampl::py::send0_t>(&yampl::ISocket::send), "buffer"_a, "size"_a, "hint"_a = nullptr)
+    .def("recv", static_cast<yampl::py::recv0_t>(&yampl::ISocket::recv), "buffer"_a, "peerId"_a = yampl::DEFAULT_ID)
+    .def("tryRecv", static_cast<yampl::py::try_recv0_t>(&yampl::ISocket::tryRecv), "buffer"_a, "timeout"_a = 0, "peerId"_a = yampl::DEFAULT_ID);
 
     /**
     * @see  yampl::py::PySocket
-    * @note abstract
     */
     py::class_<yampl::py::PySocket>(self, "PySocket", R"pbdoc(ISocket wrapper class)pbdoc")
     .def(py::init<std::string, std::string>(), "name"_a, "context"_a)
-    .def("send", &yampl::py::PySocket::send, "message"_a);
+    .def("send", &yampl::py::PySocket::send, "message"_a)
+    .def("recv", &yampl::py::PySocket::recv);
+
+    /**
+    * @see  yampl::py::ClientSocket
+    */
+    py::class_<yampl::py::ClientSocket, yampl::py::PySocket>(self, "ClientSocket", R"pbdoc(ClientSocket wrapper class)pbdoc")
+    .def(py::init<std::string, std::string>(), "name"_a, "context"_a);
+
+    /**
+    * @see  yampl::py::ServerSocket
+    */
+    py::class_<yampl::py::ServerSocket, yampl::py::PySocket>(self, "ServerSocket", R"pbdoc(ServerSocket wrapper class)pbdoc")
+    .def(py::init<std::string, std::string>(), "name"_a, "context"_a);
 
     /**
     * @see yampl::Semantics

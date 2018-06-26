@@ -13,6 +13,7 @@ if (NOT DEFINED WITH_PLUGIN_PIPE OR WITH_PLUGIN_PIPE)
             PROPERTIES
             LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/plugins/yampl-pipe"
     )
+    target_link_libraries(yampl-pipe uuid)
     target_compile_options(yampl-pipe PRIVATE "-Wno-terminate")
 
     install(TARGETS yampl-pipe

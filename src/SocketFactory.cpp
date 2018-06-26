@@ -76,7 +76,8 @@ namespace yampl
                 handle = arbiter->load(dir_path_normalize(module_base_path), ZMQ_MODULE_NAME);
             }
 
-            auto socket_factory = reinterpret_cast<ISocketFactory*>(handle.create_object<ISocketFactory>(OBJ_PROTO_SK_FACTORY));
+            auto obj = handle.create_object<ISocketFactory>(OBJ_PROTO_SK_FACTORY);
+            auto socket_factory = reinterpret_cast<ISocketFactory*>(obj);
 
             if (socket_factory != nullptr) {
                 socket = socket_factory->createServerSocket(channel, semantics, deallocator);

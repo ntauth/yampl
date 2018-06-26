@@ -9,8 +9,6 @@
 #include "yampl/SocketFactory.h"
 #include "yampl/Exceptions.h"
 
-#include <iostream>
-
 #ifndef YAMPL_PYSOCKETFACTORY_H
 #define YAMPL_PYSOCKETFACTORY_H
 
@@ -48,7 +46,8 @@ namespace yampl
                 ISocket* createServerSocket(Channel channel, Semantics semantics = COPY_DATA, deallocator_fn_t deallocator = defaultDeallocator) override
                 {
                     // Forward
-                    return factory.createServerSocket(channel, semantics, *deallocator.template target<deallocator_t*>());
+                    auto f = factory.createServerSocket(channel, semantics, *deallocator.template target<deallocator_t*>());
+                    return f;
                 }
         };
     }

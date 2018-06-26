@@ -26,16 +26,6 @@ namespace yampl
 {
     namespace py
     {
-        class pickler
-        {
-            private:
-                static py_::object get_pickle_module();
-            public:
-                static py_::object dumps(py_::object obj);
-                static py_::object loads(py_::object obj);
-        };
-
-
         class byte_buffer
         {
             public:
@@ -43,7 +33,7 @@ namespace yampl
 
                 byte_buffer() = default;
 
-                byte_buffer(uint8_t* buffer_, size_t size_)
+                byte_buffer(uint8_t* buffer_, ssize_t size_)
                     : buffer(buffer_)
                     , size(size_)
                 {
@@ -81,7 +71,17 @@ namespace yampl
                 }
             protected:
                 data_type* buffer;
-                size_t     size;
+                ssize_t    size;
+        };
+
+        class pickler
+        {
+            private:
+                static py_::object get_pickle_module();
+            public:
+                static py_::object dumps(py_::object obj);
+                static py_::object loads(py_::object obj);
+                static py_::object loads(byte_buffer const& buffer);
         };
     }
 }
@@ -104,11 +104,7 @@ namespace pybind11
                  */
                 bool load(handle h, bool)
                 {
-                    object pickle = yampl::py::pickler::dumps(object(h, true));
-
-                    if (!pickle)
-                        return false;
-                    value = yampl::py::byte_buffer(reinterpret_cast<uint8_t*>(PyBytes_AsString(pickle.ptr())), py_::len(pickle));
+                    value = yampl::py::byte_buffer(reinterpret_cast<uint8_t*>(PyBytes_AsString(h.ptr())), py_::len(h));
 
                     /* Ensure return code was OK (to avoid out-of-range errors etc) */
                     return !(value.getBuffer() == nullptr && !PyErr_Occurred());
@@ -126,7 +122,7 @@ namespace pybind11
                 static handle cast(yampl::py::byte_buffer src, return_value_policy /* policy */, handle /* parent */)
                 {
                     PyObject* bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char*>(src.getBuffer()), src.getSize());
-                    return py_::make_tuple(src.getSize(), bytes);
+                    return py_::make_tuple(src.getSize(), py_::object(py_::handle(bytes), true));
                 }
         };
     }

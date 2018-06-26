@@ -16,6 +16,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <tuple>
 
 namespace py_ = pybind11;
 
@@ -23,6 +24,10 @@ namespace yampl
 {
     namespace py
     {
+        using send0_t = void (yampl::ISocket::*)(void*, size_t, void*);
+        using recv0_t = ssize_t (yampl::ISocket::*)(void*&, std::string&);
+        using try_recv0_t = ssize_t (yampl::ISocket::*)(void*&, long, std::string&);
+
         /**
          * @brief Python wrapper class for yampl::ISocket
          */
@@ -32,6 +37,7 @@ namespace yampl
                 std::unique_ptr<ISocket> socket;
                 std::unique_ptr<PySocketFactory> factory;
                 Channel channel;
+                byte_buffer data;
 
             public:
                 virtual ~PySocket() {}
@@ -70,23 +76,49 @@ namespace yampl
                 void send(py_::object message)
                 {
                     // Pickle
-                    byte_buffer raw = pickler::dumps(py_::str(message)).cast<byte_buffer>();
+                    byte_buffer raw = pickler::dumps(message).cast<byte_buffer>();
+
+                    auto data = raw.getBuffer();
+
+                    this->data = raw;
                     socket->send(raw.getBuffer(), raw.getSize());
                 }
 
-                py_::tuple recv()
+                auto recv()
                 {
                     char* data;
                     auto size = socket->recv(data);
-
-                    byte_buffer buffer(reinterpret_cast<byte_buffer::data_type*>(data), size);
+                    byte_buffer buffer { reinterpret_cast<byte_buffer::data_type*>(data), size };
 
                     // Unpickle
-                    auto obj = pickler::loads(py_::cast(buffer, py_::return_value_policy::take_ownership));
-                    return py_::make_tuple(size, obj);
+                    auto obj = pickler::loads(buffer);
+
+                    // Free the allocated memory and return a tuple containing the read bytes and the object
+                    ::free((void*) data);
+                    return std::make_tuple(size, obj);
                 }
         };
-    }
+
+        class ClientSocket : public PySocket
+        {
+            public:
+                ClientSocket(std::string name, std::string context)
+                    : PySocket(name, context)
+                {
+                    socket = std::unique_ptr<ISocket>(factory->createClientSocket(channel));
+                }
+        };
+
+        class ServerSocket : public PySocket
+        {
+            public:
+                ServerSocket(std::string name, std::string context)
+                    : PySocket(name, context)
+                {
+                    socket = std::unique_ptr<ISocket>(factory->createServerSocket(channel));
+                }
+        };
+    };
 }
 
 #endif // YAMPL_PYSOCKET_H
