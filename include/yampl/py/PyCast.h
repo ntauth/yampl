@@ -15,7 +15,7 @@
 #include <string>
 
 #if PY_MAJOR_VERSION < 3
-    #define PyVariantString_FromString PyString_AS_STRING
+    #define PyVariantString_FromString PyString_FromString
 #else
     #define PyVariantString_FromString PyUnicode_FromString
 #endif

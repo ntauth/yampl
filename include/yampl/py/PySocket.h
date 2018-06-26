@@ -94,7 +94,7 @@ namespace yampl
                     auto obj = pickler::loads(buffer);
 
                     // Free the allocated memory and return a tuple containing the read bytes and the object
-                    ::free((void*) data);
+                    defaultDeallocator(reinterpret_cast<void*>(data), nullptr);
                     return std::make_tuple(size, obj);
                 }
         };
