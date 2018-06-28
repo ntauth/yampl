@@ -285,6 +285,7 @@ if (WITH_PYBIND)
 
         # Install step
         install(CODE "set(ENV{PYTHONPATH} ${CMAKE_INSTALL_PREFIX}/python)
+                    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/python)
                     execute_process(COMMAND ${PYTHON_EXECUTABLE} \"setup.py\" \"install\"
                     \"--install-lib\" \"${CMAKE_INSTALL_PREFIX}/python\" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})"
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
