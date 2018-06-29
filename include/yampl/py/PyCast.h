@@ -104,7 +104,8 @@ namespace pybind11
                  */
                 bool load(handle h, bool)
                 {
-                    value = yampl::py::byte_buffer(reinterpret_cast<uint8_t*>(PyBytes_AsString(h.ptr())), py_::len(h));
+                    auto py_str = PyBytes_AsString(h.ptr());
+                    value = yampl::py::byte_buffer(reinterpret_cast<uint8_t*>(py_str), py_::len(h));
 
                     /* Ensure return code was OK (to avoid out-of-range errors etc) */
                     return !(value.getBuffer() == nullptr && !PyErr_Occurred());
@@ -122,7 +123,11 @@ namespace pybind11
                 static handle cast(yampl::py::byte_buffer src, return_value_policy /* policy */, handle /* parent */)
                 {
                     PyObject* bytes = PyBytes_FromStringAndSize(reinterpret_cast<const char*>(src.getBuffer()), src.getSize());
-                    return py_::make_tuple(src.getSize(), py_::object(py_::handle(bytes), true));
+                    auto bytes_obj = reinterpret_steal<object>(py_::handle(bytes));
+                    auto tuple = py_::make_tuple(src.getSize(), bytes_obj);
+
+                    tuple.inc_ref();
+                    return tuple;
                 }
         };
     }

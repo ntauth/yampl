@@ -12,7 +12,7 @@ namespace yampl
     {
         py_::object pickler::get_pickle_module()
         {
-            static py_::object _instance = py_::object(py_::handle(PyImport_ImportModuleNoBlock("pickle")), true);
+            static py_::object _instance = py_::reinterpret_borrow<py_::object>(py_::handle(PyImport_ImportModuleNoBlock("pickle")));
 
             if (!_instance)
                 throw UnsupportedException("Could not load Python module `pickle`");
@@ -24,21 +24,21 @@ namespace yampl
         {
             auto pickle_module = get_pickle_module();
             auto pickle = PyObject_CallMethodObjArgs(pickle_module.ptr(), PyVariantString_FromString("dumps"), obj.ptr(), nullptr);
-            return py_::object(py_::handle(pickle), false);
+            return py_::reinterpret_steal<py_::object>(py_::handle(pickle));
         }
 
         py_::object pickler::loads(py_::object obj)
         {
             auto pickle_module = get_pickle_module();
             auto unpickle = PyObject_CallMethodObjArgs(pickle_module.ptr(), PyVariantString_FromString("loads"), obj.ptr(), nullptr);
-            return py_::object(py_::handle(unpickle), false);
+            return py_::reinterpret_steal<py_::object>(py_::handle(unpickle));
         }
 
         py_::object pickler::loads(byte_buffer const& buffer)
         {
             auto pickle_module = get_pickle_module();
             auto obj = PyBytes_FromStringAndSize(reinterpret_cast<const char*>(buffer.getBuffer()), buffer.getSize());
-            return loads(py_::object(py_::handle(obj), false));
+            return loads(py_::reinterpret_steal<py_::object>(py_::handle(obj)));
         }
     }
 }

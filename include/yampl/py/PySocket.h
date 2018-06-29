@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <memory>
 #include <string>
-#include <iostream>
 #include <tuple>
 
 namespace py_ = pybind11;
@@ -39,6 +38,34 @@ namespace yampl
                 Channel channel;
                 byte_buffer data;
 
+                auto _recv_impl(bool raw = false, bool try_impl = false, long timeout = 0)
+                {
+                    char* data;
+                    ssize_t size;
+
+                    if (try_impl)
+                        size = socket->tryRecv(data, timeout);
+                    else
+                        size = socket->recv(data);
+
+                    byte_buffer buffer { reinterpret_cast<byte_buffer::data_type*>(data), size };
+
+                    py_::object obj;
+
+                    // Decode the data iff not calling the try* implementation or recv was successful
+                    if (!try_impl || size != -1)
+                    {
+                        if (raw)
+                            obj = py_::reinterpret_borrow<py_::object>(py_::cast(buffer));
+                        else
+                            obj = pickler::loads(buffer);
+                    }
+
+                    // Free the allocated memory and return a tuple containing the read bytes and the object
+                    if (size != -1)
+                        defaultDeallocator(reinterpret_cast<void*>(data), nullptr);
+                    return std::make_tuple(size, obj);
+                }
             public:
                 virtual ~PySocket() {}
 
@@ -84,18 +111,29 @@ namespace yampl
                     socket->send(raw.getBuffer(), raw.getSize());
                 }
 
+                void send_raw(std::string message)
+                {
+                    socket->send(message);
+                }
+
                 auto recv()
                 {
-                    char* data;
-                    auto size = socket->recv(data);
-                    byte_buffer buffer { reinterpret_cast<byte_buffer::data_type*>(data), size };
+                    return _recv_impl();
+                }
 
-                    // Unpickle
-                    auto obj = pickler::loads(buffer);
+                auto try_recv(long timeout = 0)
+                {
+                    return _recv_impl(false, true, timeout);
+                }
 
-                    // Free the allocated memory and return a tuple containing the read bytes and the object
-                    defaultDeallocator(reinterpret_cast<void*>(data), nullptr);
-                    return std::make_tuple(size, obj);
+                auto recv_raw()
+                {
+                    return _recv_impl(true);
+                }
+
+                auto try_recv_raw(long timeout)
+                {
+                    return _recv_impl(true, true, timeout);
                 }
         };
 
