@@ -274,6 +274,11 @@ if (WITH_PYBIND)
 
         # Rename yampl_py.suffix.so to yampl.so
         execute_process(COMMAND ${PYTHON_EXECUTABLE}-config "--extension-suffix" OUTPUT_VARIABLE PY_EXTENSION_SUFFIX)
+
+        if (NOT DEFINED PY_EXTENSION_SUFFIX OR PY_EXTENSION_SUFFIX STREQUAL "")
+            set(PY_EXTENSION_SUFFIX ".so")
+        endif()
+
         add_custom_command(TARGET yampl_py
                 POST_BUILD
                 COMMAND sh -c "cp $<TARGET_FILE:yampl_py> ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/yampl${PY_EXTENSION_SUFFIX}"

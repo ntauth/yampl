@@ -122,6 +122,8 @@ namespace yampl
             dir_entry = readdir(dir);
         }
 
+        closedir(dir);
+
         return file_list;
     }
 }
