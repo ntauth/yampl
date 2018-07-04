@@ -9,6 +9,38 @@ from distutils.version import LooseVersion
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
+class ArgParserHelper:
+    '''Helper class to parse arguments'''
+    def __init__(self, argv):
+        self.args = list(argv)
+        self.rx = re.compile(r'^-D([a-zA-Z0-9_\-]+)=([^*&%\s]+)$')
+
+    def parse(self):
+        kwargs = {}
+
+        try:
+            for arg in self.args:
+                m = self.rx.match(arg)
+
+                if m is not None:
+                    if not m.group(1) in kwargs:
+                        kwargs[m.group(1)] = m.group(2)
+                    else:
+                        raise ValueError('Duplicate argument')
+        except ValueError as e:
+            print('Argument format is invalid: %s' % e.message)
+
+        return kwargs
+
+    def purge(self):
+        for arg in self.args:
+            args = list(self.args)
+            m = self.rx.match(arg)
+
+            if m is not None:
+                args.remove(m.group())
+            
+        return args
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -75,7 +107,11 @@ class CMakeBuild(build_ext):
                               cwd=self.build_temp)
         print()
 
-## Setup
+# Filter custom arguments
+arg_parser = ArgParserHelper(sys.argv)
+sys.argv = arg_parser.purge()
+
+# Setup
 setup(
     name='yampl',
     version='1.0',

@@ -39,13 +39,19 @@ PYBIND11_MODULE(yampl, self)
         YAMPL Bindings for Python
         --------------------------
 
-        .. currentmodule:: yampl_py
+        .. currentmodule:: yampl
 
         .. autosummary::
            :toctree: _generate
            Context
            Channel
+           Semantics
            ISocket
+           PySocket
+           ClientSocket
+           ServerSocket
+           ISocketFactory
+           SocketFactory
     )pbdoc";
 
     self.attr("__version__") = YAMPL_PY_VERSION;
@@ -69,6 +75,14 @@ PYBIND11_MODULE(yampl, self)
     .def_readwrite("context", &yampl::Channel::context);
 
     /**
+    * @see yampl::Semantics
+    */
+    py::enum_<yampl::Semantics>(self, "Semantics", R"pbdoc(Buffer copy semantics)pbdoc")
+    .value("COPY_DATA", yampl::Semantics::COPY_DATA)
+    .value("MOVE_DATA", yampl::Semantics::MOVE_DATA);
+
+
+    /**
     * @see  yampl::ISocket
     * @note abstract
     */
@@ -83,7 +97,11 @@ PYBIND11_MODULE(yampl, self)
     py::class_<yampl::py::PySocket>(self, "PySocket", R"pbdoc(ISocket wrapper class)pbdoc")
     .def(py::init<std::string, std::string>(), "name"_a, "context"_a)
     .def("send", &yampl::py::PySocket::send, "message"_a)
-    .def("recv", &yampl::py::PySocket::recv);
+    .def("send_raw", &yampl::py::PySocket::send_raw, "message"_a)
+    .def("recv", &yampl::py::PySocket::recv)
+    .def("recv_raw", &yampl::py::PySocket::recv_raw)
+    .def("try_recv", &yampl::py::PySocket::try_recv, "timeout"_a = 0)
+    .def("try_recv_raw", &yampl::py::PySocket::try_recv_raw, "timeout"_a = 0);
 
     /**
     * @see  yampl::py::ClientSocket
@@ -96,13 +114,6 @@ PYBIND11_MODULE(yampl, self)
     */
     py::class_<yampl::py::ServerSocket, yampl::py::PySocket>(self, "ServerSocket", R"pbdoc(ServerSocket wrapper class)pbdoc")
     .def(py::init<std::string, std::string>(), "name"_a, "context"_a);
-
-    /**
-    * @see yampl::Semantics
-    */
-    py::enum_<yampl::Semantics>(self, "Semantics", R"pbdoc(Buffer copy semantics)pbdoc")
-    .value("COPY_DATA", yampl::Semantics::COPY_DATA)
-    .value("MOVE_DATA", yampl::Semantics::MOVE_DATA);
 
     /**
     * @see  yampl::py::Py(I)SocketFactory

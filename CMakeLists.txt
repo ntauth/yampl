@@ -285,10 +285,14 @@ if (WITH_PYBIND)
         )
     else()
         # Recursively build the bindings by invoking Python
-        add_custom_target(yampl_py_NO_PYPI_INVOKE ALL COMMAND ${PYTHON_EXECUTABLE} "setup.py" "build" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
+        add_custom_target(yampl_py_NO_PYPI_INVOKE ALL COMMAND ${PYTHON_EXECUTABLE} "setup.py" "build" "-b" "${CMAKE_BINARY_DIR}"
+                WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
         # Install step
-        install(CODE "execute_process(COMMAND ${PYTHON_EXECUTABLE} \"setup.py\" \"install\" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})"
+        install(CODE "set(ENV{PYTHONPATH} ${CMAKE_INSTALL_PREFIX}/python)
+                    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/python)
+                    execute_process(COMMAND ${PYTHON_EXECUTABLE} \"setup.py\" \"install\"
+                    \"--install-lib\" \"${CMAKE_INSTALL_PREFIX}/python\" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})"
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     endif()
 endif()
