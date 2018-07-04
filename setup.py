@@ -9,8 +9,9 @@ from distutils.version import LooseVersion
 from setuptools import setup, Extension
 from setuptools.command.build_ext import build_ext
 
+
 class ArgParserHelper:
-    '''Helper class to parse arguments'''
+    """Helper class to parse arguments"""
     def __init__(self, argv):
         self.args = list(argv)
         self.rx = re.compile(r'^-D([a-zA-Z0-9_\-]+)=([^*&%\s]+)$')
@@ -41,6 +42,7 @@ class ArgParserHelper:
                 args.remove(m.group())
             
         return args
+
 
 class CMakeExtension(Extension):
     def __init__(self, name, sourcedir=''):
@@ -106,6 +108,7 @@ class CMakeBuild(build_ext):
         subprocess.check_call(['cmake', '--build', '.'] + build_args,
                               cwd=self.build_temp)
         print()
+
 
 # Filter custom arguments
 arg_parser = ArgParserHelper(sys.argv)

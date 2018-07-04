@@ -4,8 +4,8 @@
 # - WITH_EXAMPLES: Includes examples in the build process
 # - WITH_TESTS: Includes tests in the build process
 # - WITH_PLUGIN_<PluginId>: Include plugin yampl-<PluginId> in the build process
-# - WITH_PYBIND: Include PyBind11 bindings in the build process
-# - PYBIND_ONLY: Specifies whether to build the PyBind11 bindings only
+# - WITH_PYBIND: Include Python bindings in the build process
+# - PYBIND_ONLY: Specifies whether to build the Python bindings only
 # - PYPI_INVOKE: Private option used by setup.py to inform CMake the build was invoked from Python
 #
 if (NOT PYPI_INVOKE)
@@ -289,7 +289,7 @@ if (WITH_PYBIND)
                 WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
 
         # Install step
-        install(CODE "set(ENV{PYTHONPATH} ${CMAKE_INSTALL_PREFIX}/python)
+        install(CODE "set(ENV{PYTHONPATH} ${CMAKE_INSTALL_PREFIX}/python:$ENV{PYTHONPATH})
                     file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/python)
                     execute_process(COMMAND ${PYTHON_EXECUTABLE} \"setup.py\" \"install\"
                     \"--install-lib\" \"${CMAKE_INSTALL_PREFIX}/python\" WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})"

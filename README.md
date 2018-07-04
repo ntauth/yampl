@@ -41,20 +41,39 @@ git clone https://github.com/ntauth/yampl-zmq
 # Configure project
 mkdir /path/to/build/directory
 cd /path/to/build/directory
-cmake /path/to/repo/root -DWITH_EXAMPLES={ON(DEFAULT)|OFF} -DWITH_TESTS={ON(DEFAULT)|OFF} -DWITH_PLUGIN_{SHM|ZMQ|PIPE}={ON(Default)|OFF} -DCMAKE_INSTALL_PREFIX=/path/to/install/directory
+cmake /path/to/repo/root
 # Build and install
 make
 make install
 # Run tests
 make test
+# Run examples
+make example
 ```
 
-To compile and link against the YAMPL library:
-```
+A number of flags can be passed to CMake to customize the build:
+- `WITH_EXAMPLES`: Include examples in the build
+- `WITH_TESTS`: Include tests in the build
+- `WITH_PLUGIN_[PluginId]`: Include plugin yampl-[PluginId] in the build
+- `WITH_PYBIND`: Include Python bindings in the build
+- `PYBIND_ONLY`: Build Python bindings only
+
+To compile and link against the YAMPL library, assuming `${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/` is in `PKG_CONFIG_PATH`:
+```bash
 g++ `pkg-config yampl --libs --cflags` foo.cpp
 ```
 
 YAMPL is by default installed in `$HOME/yampl` unless you provide a `CMAKE_INSTALL_PREFIX` when configuring the project with CMake. Another file, `.yamplrc` is installed in `$HOME` and is used by the plugin manager to locate the plugins installed in the system.
+
+## Runtime Configuration
+YAMPL is automatically built with `-DWITH_PYBIND=ON`, which seamlessly generates Python bindings. The bindings are installed in `${CMAKE_INSTALL_PREFIX}/python`. In order to import the bindings, the
+`PYTHONPATH` environment variable pointing to `${CMAKE_INSTALL_PREFIX}/python` has to be exported. The bindings can now be used within Python as follows:
+```python
+import yampl
+
+socket = ClientSocket('<server_name>', '<socket_type>')
+socket.send({ 'Hello': 'World' })
+```
 
 ## Examples
 The *examples* subdirectory provides binaries that demonstrate some use-cases.
