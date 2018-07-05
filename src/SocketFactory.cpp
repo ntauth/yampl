@@ -3,13 +3,10 @@
 #include "yampl/Exceptions.h"
 
 #include <cstdlib>
-#include <iostream>
 
 namespace yampl
 {
     using plugin::PluginArbiterException;
-
-//    std::string DEFAULT_ID = "";
 
     SocketFactory::SocketFactory() noexcept
         : arbiter(PluginArbiter::get_instance())
@@ -53,7 +50,7 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-            std::cout << "The client socket could not be created. " << ex.what() << std::endl;
+//            std::cout << "The client socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;
@@ -86,7 +83,7 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-            std::cout << "The server socket could not be created. " << ex.what() << std::endl;
+//            std::cout << "The server socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;

@@ -51,6 +51,7 @@ endif()
 # Common source files for plugins
 set(YAMPL_PLUGIN_COMMON_SRCS
         src/plugin/PluginArbiter.cpp
+        src/utils/Globals.cpp
         src/utils/utils.cpp
         src/ISocket.cpp
 )
