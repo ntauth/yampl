@@ -40,7 +40,7 @@ namespace yampl
 
                 auto _recv_impl(bool raw = false, bool try_impl = false, long timeout = 0)
                 {
-                    char* data;
+                    char* data = nullptr;
                     ssize_t size;
 
                     if (try_impl)
@@ -58,13 +58,15 @@ namespace yampl
                         if (raw)
                             obj = py_::reinterpret_borrow<py_::object>(py_::cast(buffer));
                         else
-                            obj = pickler::loads(buffer);
+                            obj = py_::make_tuple(size, pickler::loads(buffer));
                     }
+                    else
+                        obj = py_::make_tuple(-1, py_::none());
 
                     // Free the allocated memory and return a tuple containing the read bytes and the object
                     if (size != -1)
                         defaultDeallocator(reinterpret_cast<void*>(data), nullptr);
-                    return std::make_tuple(size, obj);
+                    return obj;
                 }
             public:
                 virtual ~PySocket() {}

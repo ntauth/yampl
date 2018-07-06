@@ -2,43 +2,12 @@
 
 import sys
 import os
-import re
+import getopt
 import math
 import time
+import threading
+
 import yampl as ym
-
-
-class ArgParserHelper:
-    """Helper class to parse arguments"""
-    def __init__(self, argv):
-        self.args = list(argv)
-        self.rx = re.compile(r'^-([a-zA-Z_\-]+)\s+(\w*)$')
-
-    def parse(self):
-        kwargs = {}
-
-        for arg in self.args:
-            m = self.rx.match(arg)
-
-            if m is not None:
-                if not m.group(1) in kwargs:
-                    kwargs[m.group(1)] = m.group(2)
-                else:
-                    raise ValueError('Duplicate argument')
-
-        return kwargs
-
-    def purge(self):
-        args = list()
-
-        for arg in self.args:
-            args = list(self.args)
-            m = self.rx.match(arg)
-
-            if m is not None:
-                args.remove(m.group())
-
-        return args
 
 
 def run_async(func):
@@ -53,6 +22,10 @@ def run_async(func):
         return func_hl
 
     return async_func
+
+
+def get_tid():
+    return int(threading.get_ident()) * 31 % 3**10
 
 
 def run_fork(func):
@@ -75,11 +48,13 @@ def run_fork(func):
 
 class Benchmark:
     """Class containing client/server benchmark asynchronous methods"""
-    def __init__(self, channel, size, iterations):
+    def __init__(self, channel, size, iterations, timeout=0):
         self.channel = channel
         self.size = int(size)
         self.iterations = int(iterations)
         self.mailbox = {}
+        self.watermark = 'yampl'
+        self.timeout = timeout
 
     @staticmethod
     def parse_context(context):
@@ -138,23 +113,31 @@ class Benchmark:
 
     @run_async
     def client_async(self):
+        print('[+] Client launched on thread %d' % get_tid())
         self.client_thunk()
 
     def client_thunk(self):
-        retval = self.client()
-        self.mailbox['client'] = retval
+        result = self.client()
+        self.mailbox['client'] = result
 
     def client(self):
         channel_parsed = self.parse_channel(self.channel)
         socket = ym.ClientSocket(channel_parsed[0], channel_parsed[1])
-
-        s_buffer = self.make_payload(self.size, 'yampl')
+        s_buffer = self.make_payload(self.size, self.watermark)
 
         start_tm = time.clock()
 
         for i in range(self.iterations):
             socket.send_raw(s_buffer)
-            r_buffer = socket.recv_raw()
+
+            if self.channel.context == ym.Context.THREAD:
+                size = -1
+
+                while size == -1:
+                    r_buffer = socket.try_recv_raw(self.timeout)
+                    size = r_buffer[0]
+            else:
+                r_buffer = socket.recv_raw()
 
         end_tm = time.clock()
 
@@ -166,22 +149,29 @@ class Benchmark:
 
     @run_async
     def server_async(self, multiplicity):
+        print('[+] Server launched on thread %d' % get_tid())
         self.server_thunk(multiplicity)
 
     def server_thunk(self, multiplicity):
-        retval = self.server(multiplicity)
-        self.mailbox['server'] = retval
+        result = self.server(multiplicity)
+        self.mailbox['server'] = result
 
     def server(self, multiplicity):
         channel_parsed = self.parse_channel(self.channel)
         socket = ym.ServerSocket(channel_parsed[0], channel_parsed[1])
-
-        s_buffer = self.make_payload(self.size, 'yampl')
+        s_buffer = self.make_payload(self.size, self.watermark)
 
         start_tm = time.clock()
 
         for i in range(self.iterations * multiplicity):
-            r_buffer = socket.recv_raw()
+            if self.channel.context == ym.Context.THREAD:
+                size = -1
+
+                while size == -1:
+                    r_buffer = socket.try_recv_raw(self.timeout)
+                    size = r_buffer[0]
+            else:
+                r_buffer = socket.recv_raw()
             socket.send_raw(s_buffer)
 
         end_tm = time.clock()
@@ -190,33 +180,34 @@ class Benchmark:
         return elapsed_tm
 
 
-def main(args):
+def main():
     sock_ctx = 'local_pipe'
     sock_channel = 'service'
 
+    semantics = ym.Semantics.COPY_DATA  # MOVE_DATA is unsupported
     iterations = 1e3
     payload_size = 1e6
     multiplicity = 1
 
-    # Parse opt-args
-    for k, v in args.items():
-        if k == 'i':
-            sock_impl = v
-        elif k == 'n':
-            iterations = v
-        elif k == 's':
-            payload_size = v
-        elif k == 'c':
-            sock_ctx = v
-        elif k == 'm':
-            multiplicity = v
+    opts, args = getopt.getopt(sys.argv[1:], 'n:s:c:m:')
 
-    print('[+] Running benchmark with: \n - Iterations: %d \n - Payload Size: %d \n - Multiplicity: %d'
-          % (iterations, payload_size, multiplicity))
+    # Parse options
+    for kvp in opts:
+        if kvp[0] == '-n':
+            iterations = int(kvp[1])
+        elif kvp[0] == '-s':
+            payload_size = int(kvp[1])
+        elif kvp[0] == '-c':
+            sock_ctx = kvp[1]
+        elif kvp[0] == '-m':
+            multiplicity = int(kvp[1])
+
+    print('[+] Running benchmark with: \n - Context: %s\n - Semantics: %s\n'
+          ' - Iterations: %d \n - Payload Size: %d\n - Multiplicity: %d'
+          % (sock_ctx.upper(), semantics, iterations, payload_size, multiplicity))
 
     # Run
     sock_channel_ = ym.Channel(sock_channel, Benchmark.parse_context(sock_ctx))
-
     ctxs = [ym.Context.LOCAL, ym.Context.LOCAL_PIPE, ym.Context.LOCAL_SHM, ym.Context.DISTRIBUTED]
 
     if sock_channel_.context in ctxs:
@@ -224,7 +215,7 @@ def main(args):
 
         pids = []
 
-        for i in range(1, multiplicity + 1):
+        for i in range(0, multiplicity):
             pids.append(benchmark.client_fork())
 
         benchmark.server_thunk(multiplicity)
@@ -232,14 +223,22 @@ def main(args):
         for pid in pids:
             os.waitpid(pid, 0)
     elif sock_channel_.context == ym.Context.THREAD:
+        """
+        The THREAD context doesn't actually yield the expected results
+        due to Python's internal multi-threading policy that implicates
+        that only one thread can be holding the GIL (Global Interpreter
+        Lock) at any one time. The result is highly degraded performance,
+        unlock LOCAL, LOCAL_PIPE and DISTRIBUTED which run on their own 
+        processes.
+        """
         benchmark = Benchmark(sock_channel_, payload_size, iterations)
+
+        benchmark.server_async(multiplicity)
 
         tasks = []
 
         for i in range(multiplicity):
             tasks.append(benchmark.client_async())
-
-        benchmark.server_async(multiplicity)
 
         for task in tasks:
             task.join()
@@ -248,14 +247,14 @@ def main(args):
 
     server_tm = benchmark.mailbox['server']
 
-    print('[+] Latency: %f μS' % (server_tm / (2 * iterations * multiplicity)))
-    print('[+] Bandwidth: %f MB/s' % (2 * payload_size * iterations * multiplicity / server_tm))
+    print('[+] Latency: %.0f μS' % (server_tm / (2 * iterations * multiplicity)))
+    print('[+] Bandwidth: %.0f MB/s' % (2 * payload_size * iterations * multiplicity / server_tm))
 
     return
 
 
 if __name__ == '__main__':
     try:
-        main(ArgParserHelper(sys.argv).parse())
+        main()
     except ValueError:
         print('Usage: %s [-c context] [-n iterations] [-s size]')

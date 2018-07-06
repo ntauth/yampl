@@ -50,7 +50,6 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-//            std::cout << "The client socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;
@@ -83,7 +82,6 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-//            std::cout << "The server socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;
