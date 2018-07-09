@@ -41,7 +41,7 @@ git clone https://github.com/ntauth/yampl-zmq
 # Configure project
 mkdir /path/to/build/directory
 cd /path/to/build/directory
-cmake /path/to/repo/root
+cmake /path/to/repo/root -DCMAKE_INSTALL_PREFIX=/path/to/install/dir
 # Build and install
 make
 make install
