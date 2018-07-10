@@ -121,7 +121,8 @@ if (NOT PYBIND_ONLY)
 
         # Add a custom command to run examples
         add_custom_target(example
-            COMMAND sh -c "benchmark/benchmark && client_server/server & client_server/client"
+            COMMAND "benchmark/benchmark"
+            COMMAND sh -c "client_server/server \\& client_server/client"
             WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
         )
     endif()
