@@ -5,7 +5,7 @@ import os
 import getopt
 import math
 import time
-import threading
+import thread
 
 import yampl as ym
 
@@ -25,7 +25,7 @@ def run_async(func):
 
 
 def get_tid():
-    return int(threading.get_ident()) * 31 % 3**10
+    return int(thread.get_ident()) * 31 % 3**10
 
 
 def run_fork(func):
@@ -58,6 +58,8 @@ class Benchmark:
 
     @staticmethod
     def parse_context(context):
+        context = context.lower()
+
         if context == 'thread':
             ctx = ym.Context.THREAD
         elif context == 'local_shm':
@@ -69,7 +71,7 @@ class Benchmark:
         elif context == 'distributed':
             ctx = ym.Context.DISTRIBUTED
         else:
-            ctx = ''
+            raise ValueError('Invalid context')
 
         return ctx
 
@@ -192,15 +194,15 @@ def main():
     opts, args = getopt.getopt(sys.argv[1:], 'n:s:c:m:')
 
     # Parse options
-    for kvp in opts:
-        if kvp[0] == '-n':
-            iterations = int(kvp[1])
-        elif kvp[0] == '-s':
-            payload_size = int(kvp[1])
-        elif kvp[0] == '-c':
-            sock_ctx = kvp[1]
-        elif kvp[0] == '-m':
-            multiplicity = int(kvp[1])
+    for opt in opts:
+        if opt[0] == '-n':
+            iterations = int(opt[1])
+        elif opt[0] == '-s':
+            payload_size = int(opt[1])
+        elif opt[0] == '-c':
+            sock_ctx = opt[1]
+        elif opt[0] == '-m':
+            multiplicity = int(opt[1])
 
     print('[+] Running benchmark with: \n - Context: %s\n - Semantics: %s\n'
           ' - Iterations: %d \n - Payload Size: %d\n - Multiplicity: %d'
@@ -243,11 +245,11 @@ def main():
         for task in tasks:
             task.join()
     else:
-        raise ValueError('Context is invalid')
+        raise ValueError('Unimplemented context')
 
     server_tm = benchmark.mailbox['server']
 
-    print('[+] Latency: %.0f μS' % (server_tm / (2 * iterations * multiplicity)))
+    print('[+] Latency: %.0f uS' % (server_tm / (2 * iterations * multiplicity)))
     print('[+] Bandwidth: %.0f MB/s' % (2 * payload_size * iterations * multiplicity / server_tm))
 
     return
@@ -257,4 +259,4 @@ if __name__ == '__main__':
     try:
         main()
     except ValueError:
-        print('Usage: %s [-c context] [-n iterations] [-s size]')
+        print('Usage: python benchmark.py [-c context] [-n iterations] [-s size]')
