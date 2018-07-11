@@ -36,8 +36,17 @@ set(YAMPL_VERSION 1.0)
 include(cmake/YamplUtils.cmake)
 USE_CXX14()
 
-# Suppress -Wterminate and -Wreturn-type
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-terminate -Wno-return-type")
+if (NOT DEFINED CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release")
+endif()
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-terminate -Wno-return-type -fPIC")
+set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+if (CMAKE_BUILD_TYPE MATCHES Release)
+    add_definitions(-DNDEBUG)
+endif()
 
 # Default install prefix
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -120,10 +129,21 @@ if (NOT PYBIND_ONLY)
         add_dependencies(benchmark yampl)
 
         # Add a custom command to run examples
+        set(YAMPL_EXAMPLE_BENCHMARK $<TARGET_FILE:benchmark>)
+
         add_custom_target(example
-            COMMAND "benchmark/benchmark"
-            COMMAND sh -c "client_server/server \\& client_server/client"
-            WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK}
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -y
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -y -m 32 -n 128 -s 250000
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i pipe
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i pipe -y
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i pipe -m 32 -n 128 -s 250000
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i shm
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i shm -y
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -i shm -m 32 -n 128 -s 250000
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -c THREAD
+           COMMAND ${YAMPL_EXAMPLE_BENCHMARK} -c DISTRIBUTED
+           WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/examples
         )
     endif()
 
