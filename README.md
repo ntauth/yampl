@@ -57,9 +57,9 @@ A number of flags can be passed to CMake to customize the build:
 - `WITH_PLUGIN_[PluginId]`: Include plugin yampl-[PluginId] in the build. **Default: ON**
 - `WITH_PYBIND`: Include Python bindings in the build. **Default: ON**
 - `PYBIND_ONLY`: Build Python bindings only. **Default: OFF**
-- `PYTHON_EXECUTABLE:FILEPATH`: Path to the Python binary.
-- `PYTHON_INCLUDE_DIR:PATH`: Path to the Python include directory.
-- `PYTHON_LIBRARY:FILEPATH`: Path to the Python library.
+- `PYTHON_EXECUTABLE:FILEPATH`: Path to the Python binary. **Default:** Automatically Detected
+- `PYTHON_INCLUDE_DIR:PATH`: Path to the Python include directory. **Default:** Automatically Detected
+- `PYTHON_LIBRARY:FILEPATH`: Path to the Python library. **Default:** Automatically Detected
 
 **Note** that if `WITH_PYBIND` is enabled, a working version of Python >= 2.7 with the `setuptools` library installed is required. If you don't have `setuptools`, you can install it using ```pip install setuptools```.
 If you have multiple versions of Python installed in the system, you can use the `PYTHON_*` flags listed above to point to a specific version of Python.
