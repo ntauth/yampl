@@ -52,11 +52,17 @@ make example
 ```
 
 A number of flags can be passed to CMake to customize the build:
-- `WITH_EXAMPLES`: Include examples in the build
-- `WITH_TESTS`: Include tests in the build
-- `WITH_PLUGIN_[PluginId]`: Include plugin yampl-[PluginId] in the build
-- `WITH_PYBIND`: Include Python bindings in the build
-- `PYBIND_ONLY`: Build Python bindings only
+- `WITH_EXAMPLES`: Include examples in the build. **Default: ON**
+- `WITH_TESTS`: Include tests in the build. **Default: ON**
+- `WITH_PLUGIN_[PluginId]`: Include plugin yampl-[PluginId] in the build. **Default: ON**
+- `WITH_PYBIND`: Include Python bindings in the build. **Default: ON**
+- `PYBIND_ONLY`: Build Python bindings only. **Default: OFF**
+- `PYTHON_EXECUTABLE:FILEPATH`: Path to the Python binary.
+- `PYTHON_INCLUDE_DIR:PATH`: Path to the Python include directory.
+- `PYTHON_LIBRARY:FILEPATH`: Path to the Python library.
+
+**Note** that if `WITH_PYBIND` is enabled, a working version of Python >= 2.7 with the `setuptools` library installed is required. If you don't have `setuptools`, you can install it using ```pip install setuptools```.
+If you have multiple versions of Python installed in the system, you can use the `PYTHON_*` flags listed above to point to a specific version of Python.
 
 To compile and link against the YAMPL library, assuming `${CMAKE_INSTALL_PREFIX}/lib/pkgconfig/` is in `PKG_CONFIG_PATH`:
 ```bash
