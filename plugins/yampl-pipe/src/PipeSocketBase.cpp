@@ -9,6 +9,7 @@
 #include <cstring>
 #include <string>
 #include <sstream>
+#include <iostream>
 #include <cstdlib>
 #include <algorithm>
 #include <tr1/functional>
@@ -58,8 +59,8 @@ PipeSocketBase::PipeSocketBase(const Channel &channel, Mode mode, Semantics sema
   if(m_mode == PIPE_PULL){
 #ifdef F_SETPIPE_SZ
     //feature added in Linux 2.6.35
-    if(fcntl(m_transferPipe->getWriteFD(), F_SETPIPE_SZ, 1048576) == -1)
-      throw ErrnoException("Failed to set the pipe's buffer size");
+    fcntl(m_transferPipe->getWriteFD(), F_SETPIPE_SZ, 1048576);
+     // throw ErrnoException("Failed to set the pipe's buffer size");
 #endif
   }else if(m_mode == PIPE_PUSH)
     m_ctlThread.reset(new Thread(tr1::bind(&PipeSocketBase::ctlThreadFun, this, deallocator)));

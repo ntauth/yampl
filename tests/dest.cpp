@@ -15,6 +15,7 @@ void client(ISocketFactory *factory, const Channel &channel)
 
     socket->send("Hello World!");
     socket->recv(buffer);
+
     assert(strcmp(buffer, "pong") == 0);
 
     delete socket;

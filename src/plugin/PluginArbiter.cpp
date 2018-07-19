@@ -121,7 +121,6 @@ namespace yampl
                         _module_init_stack.pop();
 
                     std::string what = "PluginArbiter could not load module " + plugin_module_name + ". " + ex.what();
-
                     throw PluginArbiterException(what.c_str(), PluginStatus::ModuleLoadError);
                 }
             }

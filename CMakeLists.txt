@@ -36,8 +36,8 @@ set(YAMPL_VERSION 1.0)
 include(cmake/YamplUtils.cmake)
 USE_CXX14()
 
-if (NOT DEFINED CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
+if (NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-terminate -Wno-return-type -fPIC")
@@ -232,7 +232,7 @@ if (NOT PYBIND_ONLY)
     set_target_properties(yampl PROPERTIES RESOURCE "${YAMPL_RESOURCES}")
 
     # Configure yampl-env.sh.in
-    set(YAMPL_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/lib")
+    set(YAMPL_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/")
     set(YAMPL_ENV_DIR "/etc/profile.d")
 
     configure_file(config/yampl-env.sh.in ${CMAKE_BINARY_DIR}/scripts/yampl-env.sh @ONLY)
