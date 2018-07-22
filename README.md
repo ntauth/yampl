@@ -71,7 +71,7 @@ g++ `pkg-config yampl --libs --cflags` foo.cpp
 
 YAMPL is by default installed in `$HOME/yampl` unless you provide a `CMAKE_INSTALL_PREFIX` when configuring the project with CMake. Another file, `.yamplrc` is installed in `$HOME` and is used by the plugin manager to locate the plugins installed in the system.
 
-**NOTE**: Depending on your system, using pipes as the communication strategy may required elevated privileges. This depends on the maximum pipe buffer size reported in `/proc/sys/fs/pipe-max-size`: YAMPL sets the buffer size to 1048576 bytes to maximize performance but, if this exceeds `pipe-max-size`, the consumer process will need to be run with elevated privileges or with `CAP_SYS_RESOURCE` on. If your work environment doesn't allow this, performance will be limited, so another communication strategy would be the better fit.
+**NOTE**: Depending on your system, using pipes as the communication strategy may require elevated privileges. This depends on the maximum pipe buffer size reported in `/proc/sys/fs/pipe-max-size`: YAMPL sets the buffer size to 1048576 bytes to maximize performance but, if this exceeds `pipe-max-size`, the consumer process will need to be run with elevated privileges or with `CAP_SYS_RESOURCE` on. If your work environment doesn't allow this, performance will be limited, so another communication strategy would be the better fit.
 
 ## Runtime Configuration
 YAMPL is automatically built with `-DWITH_PYBIND=ON`, which seamlessly generates Python bindings. The bindings are installed in `${CMAKE_INSTALL_PREFIX}/python`. In order to import the bindings, the
