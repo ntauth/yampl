@@ -29,3 +29,8 @@ cmake-build-*
 plugins
 !plugins/yampl-shm
 !plugins/yampl-pipe
+
+# Ignore pybind11, dist and *.egg-info directories
+pybind11
+dist
+*.egg-info

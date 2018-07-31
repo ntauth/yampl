@@ -3,13 +3,10 @@
 #include "yampl/Exceptions.h"
 
 #include <cstdlib>
-#include <iostream>
 
 namespace yampl
 {
     using plugin::PluginArbiterException;
-
-    std::string DEFAULT_ID = "";
 
     SocketFactory::SocketFactory() noexcept
         : arbiter(PluginArbiter::get_instance())
@@ -53,7 +50,6 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-            std::cout << "The client socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;
@@ -76,7 +72,8 @@ namespace yampl
                 handle = arbiter->load(dir_path_normalize(module_base_path), ZMQ_MODULE_NAME);
             }
 
-            auto socket_factory = reinterpret_cast<ISocketFactory*>(handle.create_object<ISocketFactory>(OBJ_PROTO_SK_FACTORY));
+            auto obj = handle.create_object<ISocketFactory>(OBJ_PROTO_SK_FACTORY);
+            auto socket_factory = reinterpret_cast<ISocketFactory*>(obj);
 
             if (socket_factory != nullptr) {
                 socket = socket_factory->createServerSocket(channel, semantics, deallocator);
@@ -85,7 +82,6 @@ namespace yampl
         }
         catch (PluginArbiterException& ex)
         {
-            std::cout << "The server socket could not be created. " << ex.what() << std::endl;
         }
 
         return socket;

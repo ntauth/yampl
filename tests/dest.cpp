@@ -15,6 +15,7 @@ void client(ISocketFactory *factory, const Channel &channel)
 
     socket->send("Hello World!");
     socket->recv(buffer);
+
     assert(strcmp(buffer, "pong") == 0);
 
     delete socket;
@@ -34,9 +35,6 @@ void server(ISocketFactory* factory, const Channel &channel)
     }
     catch(UnroutableException&) {
         // OK, it's expected to reach this
-    }
-    catch (...) {
-        // @todo: Remove
     }
 
     socket->sendTo("client", "pong");
@@ -59,7 +57,8 @@ int main(int argc, char *argv[])
 
         delete factory;
     }
-    else {
+    else
+    {
         factory = new SocketFactory();
         server(factory, Channel("zmq", LOCAL));
         server(factory, Channel("pipe", LOCAL_PIPE));

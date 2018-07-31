@@ -121,7 +121,6 @@ namespace yampl
                         _module_init_stack.pop();
 
                     std::string what = "PluginArbiter could not load module " + plugin_module_name + ". " + ex.what();
-
                     throw PluginArbiterException(what.c_str(), PluginStatus::ModuleLoadError);
                 }
             }
@@ -247,7 +246,7 @@ namespace yampl
             , _arbiter(std::move(arbiter))
         { }
 
-        PluginArbiter::Handle::Handle(Handle const& rhs) { }
+//        PluginArbiter::Handle::Handle(Handle const& rhs) = delete;
 
         PluginArbiter::Handle::Handle(Handle&& rhs) noexcept
             : _moniker(std::move(rhs._moniker))
@@ -270,6 +269,8 @@ namespace yampl
 
             // Invalidate the handle if of the moved handle
             rhs._handle_id = _handle_id_invalid;
+
+            return *this;
         }
 
         void PluginArbiter::Handle::destroy_object(IObject* obj) const

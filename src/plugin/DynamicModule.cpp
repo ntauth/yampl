@@ -54,6 +54,7 @@ namespace yampl
             // Did dlopen fail?
             if (handle == nullptr)
                 throw DynamicModuleLoadException(dlerror());
+
             // Clear errors
             dlerror();
 

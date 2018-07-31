@@ -9,7 +9,7 @@
 #include <cstdio>
 #include <cstring>
 #include <memory>
-
+#include <iostream>
 #include <errno.h>
 
 namespace yampl
@@ -21,7 +21,7 @@ namespace yampl
         virtual ~Exception() throw() = default;
 
         const char * what() const throw() override {
-          return m_msg.c_str();
+            return m_msg.c_str();
         }
 
       protected:
@@ -32,10 +32,7 @@ namespace yampl
     {
         public:
             UnsupportedException() : Exception("This feature is not supported yet") {}
-            /**
-             * @author Ayoub Chouak
-             */
-            UnsupportedException(char* const what) : Exception(what) {}
+            UnsupportedException(const char* what) : Exception(what) {}
     };
 
     class InvalidOperationException: public Exception{
@@ -56,17 +53,20 @@ namespace yampl
 
     class ErrnoException : public Exception{
       public:
-        ErrnoException(const char *msg = "System call error"): Exception(msg), m_errno(errno) {
+        ErrnoException(const char *msg = "System call error"): Exception(msg), m_errno(errno)
+        {
         }
 
-        ErrnoException(int err, const char *msg = "System call error"): Exception(msg), m_errno(err){}
+        ErrnoException(int err, const char *msg = "System call error"): Exception(msg), m_errno(err)
+        {
+        }
 
         int getErrno(){
           return m_errno;
         }
 
-        virtual const char * what() const throw(){
-          snprintf(m_errnoMsg, s_maxMsgSize, "%s: %s", m_msg, strerror(m_errno));
+        virtual const char * what() const throw() {
+          snprintf(m_errnoMsg, s_maxMsgSize, "%s: %s", m_msg.c_str(), strerror(m_errno));
           return m_errnoMsg;
         }
 

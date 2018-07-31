@@ -5,7 +5,6 @@
 
 namespace yampl
 {
-
     enum Context
     {
       THREAD = 0,
@@ -18,6 +17,7 @@ namespace yampl
     struct Channel
     {
       public:
+        Channel() {}
         Channel(const std::string &name, Context context) : name(name), context(context) {}
 
         std::string name;

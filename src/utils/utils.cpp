@@ -80,7 +80,7 @@ namespace yampl
 
                         }
 
-                        pfx_s = dir_path_normalize(pfx_s) + "plugins";
+                        pfx_s = dir_path_normalize(pfx_s) + "lib/plugins";
                     }
                 }
             }
@@ -93,7 +93,7 @@ namespace yampl
                 pfx_s = home_dir_s + pfx_s_;
             }
 
-            pfx_s = dir_path_normalize(std::string(pfx)) + "plugins";
+            pfx_s = dir_path_normalize(std::string(pfx)) + "lib/plugins";
         }
 
         return pfx_s;
@@ -121,6 +121,8 @@ namespace yampl
 
             dir_entry = readdir(dir);
         }
+
+        closedir(dir);
 
         return file_list;
     }

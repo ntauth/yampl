@@ -2,6 +2,7 @@
 #define YAMPL_ISOCKET_H
 
 #include "plugin/IObject.h"
+#include "utils/Globals.h"
 
 #include <unistd.h>
 #include <assert.h>
@@ -9,7 +10,7 @@
 
 namespace yampl
 {
-    extern std::string DEFAULT_ID;
+//    extern std::string DEFAULT_ID;
 
     class ISocket
     {
