@@ -26,6 +26,9 @@ namespace yampl
 {
     namespace py
     {
+       /**
+        * @brief Raw byte buffer wrapper class for c++/python interop
+        */
         class byte_buffer
         {
             public:
@@ -33,54 +36,50 @@ namespace yampl
 
                 byte_buffer() = default;
 
-                byte_buffer(uint8_t* buffer_, ssize_t size_)
-                    : buffer(buffer_)
-                    , size(size_)
-                {
+                byte_buffer(uint8_t*, ssize_t);
+                
+               /**
+                * Getters and setters
+                */
+                uint8_t* setBuffer(uint8_t*);
+                size_t setSize(size_t);
 
-                }
+                uint8_t* getBuffer() const;
+                size_t getSize() const;
 
-                uint8_t* setBuffer(uint8_t* buffer_)
-                {
-                    uint8_t* old = buffer;
-                    buffer = buffer_;
-
-                    return old;
-                }
-
-                size_t setSize(size_t size_)
-                {
-                    size_t old = size;
-                    size = size_;
-
-                    return old;
-                }
-
-                uint8_t* getBuffer() const {
-                    return buffer;
-                }
-
-                size_t getSize() const {
-                    return size;
-                }
-
-                void release() {
-                    if (buffer != nullptr)
-                        delete buffer;
-                    size = 0;
-                }
+               /**
+                * @brief Releases the buffer
+                */
+                void release();
             protected:
                 data_type* buffer;
-                ssize_t    size;
+                ssize_t    size; //!< Actual size of the buffer
         };
 
+       /**
+        * @brief Python pickling helper class
+        */
         class pickler
         {
             private:
                 static py_::object get_pickle_module();
             public:
+               /**
+                * @param obj object to serialize as a string
+                * @return the pickled representation of the object as a string
+                */
                 static py_::object dumps(py_::object obj);
+
+               /**
+                * @param obj string to deserialize to its underlying object
+                * @return the pickled object hierarchy from `obj`
+                */
                 static py_::object loads(py_::object obj);
+
+               /**
+                * @param buffer string to deserialize to its underlying object
+                * @return the pickled object hierarchy from `buffer`
+                */
                 static py_::object loads(byte_buffer const& buffer);
         };
     }
@@ -90,6 +89,9 @@ namespace pybind11
 {
     namespace detail
     {
+       /**
+        * @brief Template specialization for byte_buffer <=> py::bytes type_caster
+        */
         template <> struct type_caster<yampl::py::byte_buffer>
         {
             public:

@@ -1,7 +1,7 @@
 /**
  * @author Ayoub Chouak (a.chouak@protonmail.com)
  * @file   PluginApi.h
- * @brief  The file contains the API for developing Yampl plugins
+ * @brief  The file contains the API for a YAMPL plugin
  */
 
 #ifndef YAMPL_PLUGINAPI_H
@@ -9,31 +9,34 @@
 
 #include <stdint.h>
 
-#define PLUGIN_API_VERSION 0UL
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
  * Visibility declaration specifiers
  */
 #if defined(__GNUC__) && __GNUC__ >= 4
-    #define YAMPL_DECL_EXPORT __attribute__((visibility ("default")))
-    #define YAMPL_DECL_IMPORT __attribute__((visibility ("default")))
-    #define YAMPL_DECL_LOCAL  __attribute__((visibility ("local")))
+ #define YAMPL_DECL_EXPORT __attribute__((visibility ("default")))
+ #define YAMPL_DECL_IMPORT __attribute__((visibility ("default")))
+ #define YAMPL_DECL_LOCAL  __attribute__((visibility ("local")))
 #elif defined(_MSC_VER)
-    #define YAMPL_DECL_EXPORT __declspec(dllexport)
-    #define YAMPL_DECL_IMPORT __declspec(dllimport)
-    #define YAMPL_DECL_LOCAL
+ #define YAMPL_DECL_EXPORT __declspec(dllexport)
+ #define YAMPL_DECL_IMPORT __declspec(dllimport)
+ #define YAMPL_DECL_LOCAL
 #else
-    #define YAMPL_DECL_EXPORT
-    #define YAMPL_DECL_IMPORT
-    #define YAMPL_DECL_LOCAL
+ #define YAMPL_DECL_EXPORT
+ #define YAMPL_DECL_IMPORT
+ #define YAMPL_DECL_LOCAL
 #endif
 
 #define PLUGIN_HDR_EXPORT _YAMPL_PLUGIN_HDR
 #define PLUGIN_HDR_EXPORT_SYM "_YAMPL_PLUGIN_HDR"
+
+#define PLUGIN_API_VERSION 0UL
+
+// Maximum length of the plugin moniker
+#define __HDR_MONIKER_MAX_LEN 32
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief Helper macro to declare plugins
@@ -49,13 +52,10 @@ extern "C" {
         }; \
     }
 
-/* Maximum length of the plugin moniker */
-#define __HDR_MONIKER_MAX_LEN 32
-
 typedef void* opaque_ptr;
 
 /**
- * @brief Enumeration that indicates to the PluginArbiter the underlying interface implemented by a plugin object
+ * @brief Type of interface implemented by a plugin object
  */
 typedef enum object_proto_type_
 {
@@ -65,12 +65,18 @@ typedef enum object_proto_type_
 
 #define OBJECT_VERSION_ANY (uint32_t) -1
 
+/**
+ * @brief Struct used for the initialization of a plugin object
+ */
 typedef struct object_init_params_
 {
     object_proto_type type; // Requested object
     uint32_t obj_version;   // Requested object version
 } object_init_params, *pobject_init_params;
 
+/**
+ * @brief Status of the execution of a lifecycle hook procedure
+ */
 typedef enum hook_exec_status_
 {
     HOOK_STATUS_UNKNOWN = 0UL,
@@ -78,6 +84,9 @@ typedef enum hook_exec_status_
     HOOK_STATUS_FAILURE,
 } hook_exec_status, *phook_exec_status;
 
+/**
+ * @brief Extended status
+ */
 typedef struct hook_exec_status_ex_
 {
     hook_exec_status status;
@@ -96,15 +105,9 @@ typedef hook_exec_status (*HOOK_PluginMain)(struct plugin_init_frame_* /* frame 
 /*********************** Hook functions (Application side) **/
 typedef hook_exec_status (*HOOK_RegisterObject)(object_register_params_* /* params */);
 
-/* Singly-linked list structure */
-#define CONTAINING_RECORD(_rcr_ty, _entry) ((_rcr_ty*)((char*) _entry - (char*)&((_rcr_ty*)(NULL)->flink)))
-
-typedef struct list_entry_
-{
-	struct list_entry_* flink;
-	struct list_entry_* blink;
-} list_entry, *plist_entry;
-
+/**
+ * @brief Struct used for the initialization of a plugin
+ */
 typedef struct plugin_init_frame_
 {
     /* Plugin API version supported by the application */
@@ -114,6 +117,10 @@ typedef struct plugin_init_frame_
     HOOK_RegisterObject hk_register;
 } plugin_init_frame, *pplugin_init_frame;
 
+/**
+ * @brief Struct representing the information header
+ *        of a plugin
+ */
 typedef struct plugin_info_hdr_
 {
     /* Moniker */
@@ -135,6 +142,9 @@ typedef struct plugin_info_hdr_
     HOOK_PluginMain hk_plugin_main;
 } plugin_info_hdr, *pplugin_info_hdr;
 
+/**
+ * @brief Struct to register a plugin object
+ */
 typedef struct object_register_params_
 {
     /* Object type */

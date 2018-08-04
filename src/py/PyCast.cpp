@@ -10,6 +10,49 @@ namespace yampl
 {
     namespace py
     {
+       /**
+        * byte_buffer
+        */
+        byte_buffer::byte_buffer(uint8_t* buffer_, ssize_t size_)
+            : buffer(buffer_)
+            , size(size_)
+        {
+
+        }
+
+        uint8_t* byte_buffer::setBuffer(uint8_t* buffer_)
+        {
+            uint8_t* old = buffer;
+            buffer = buffer_;
+
+            return old;
+        }
+
+        size_t byte_buffer::setSize(size_t size_)
+        {
+            size_t old = size;
+            size = size_;
+
+            return old;
+        }
+
+        uint8_t* byte_buffer::getBuffer() const  {
+            return buffer;
+        }
+
+        size_t byte_buffer::getSize() const {
+            return size;
+        }
+
+        void byte_buffer::release() {
+            if (buffer != nullptr)
+                delete buffer;
+            size = 0;
+        }
+
+       /**
+        * pickler
+        */
         py_::object pickler::get_pickle_module()
         {
             static py_::object _instance = py_::reinterpret_borrow<py_::object>(py_::handle(PyImport_ImportModuleNoBlock("pickle")));

@@ -139,6 +139,9 @@ namespace yampl
                 }
         };
 
+       /**
+        * @brief ClientSocket class
+        */
         class ClientSocket : public PySocket
         {
             public:
@@ -149,6 +152,9 @@ namespace yampl
                 }
         };
 
+       /**
+        * @brief ServerSocket class
+        */
         class ServerSocket : public PySocket
         {
             public:

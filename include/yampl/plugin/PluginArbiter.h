@@ -4,8 +4,8 @@
  * @brief  The file contains structures and procedures required to load and manage Yampl plugins
  */
 
-#ifndef YAMPL_PLUGINARBITER_HPP
-#define YAMPL_PLUGINARBITER_HPP
+#ifndef YAMPL_PLUGINARBITER_H
+#define YAMPL_PLUGINARBITER_H
 
 #include "DynamicModule.h"
 #include "PluginApi.h"
@@ -35,10 +35,13 @@ namespace yampl
         {
             Unknown = 0UL,
             Ok,
+
             /* Module Errors */
             ModuleLoadError,
+
             /* API Errors */
             ApiVersionMismatch,
+
             /* Plugin Errors */
             PluginGeneralError,
             PluginMainFailure,
@@ -129,7 +132,7 @@ namespace yampl
                 PluginArbiter(PluginArbiter const&);
             public:
                 /**
-                 * @brief DynamicModule handle
+                 * @brief Handle to a plugin
                  */
                 class Handle
                 {
@@ -226,4 +229,4 @@ namespace yampl
     }
 }
 
-#endif // YAMPL_PLUGINARBITER_HPP
+#endif // YAMPL_PLUGINARBITER_H
